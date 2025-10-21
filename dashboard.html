@@ -152,10 +152,10 @@
       pointer-events: none;
       z-index: 9999;
       background: 
-        radial-gradient(circle at 0 0, black 32px, transparent 33px) top left,
-        radial-gradient(circle at 100% 0, black 32px, transparent 33px) top right,
-        radial-gradient(circle at 0 100%, black 32px, transparent 33px) bottom left,
-        radial-gradient(circle at 100% 100%, black 32px, transparent 33px) bottom right;
+        radial-gradient(circle at 32px 32px, transparent 32px, black 33px) top left,
+        radial-gradient(circle at calc(100% - 32px) 32px, transparent 32px, black 33px) top right,
+        radial-gradient(circle at 32px calc(100% - 32px), transparent 32px, black 33px) bottom left,
+        radial-gradient(circle at calc(100% - 32px) calc(100% - 32px), transparent 32px, black 33px) bottom right;
       background-size: 51% 51%;
       background-repeat: no-repeat;
     }
