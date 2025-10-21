@@ -13,11 +13,11 @@
     * { box-sizing: border-box; }
     
     :root {
-      /* Liquid Glass Theme - Brighter */
-      --bg-gradient-1: #5dd9ff;
-      --bg-gradient-2: #b794ff;
-      --bg-gradient-3: #ff94d4;
-      --bg-gradient-4: #ffd95d;
+      --bg-gradient-1: #84d0f5;
+      --bg-gradient-2: #fdc42a;
+      --bg-gradient-3: #f39200;
+      --bg-gradient-4: #e4022b;
+      --bg-gradient-5: #ae2146;
       
       --glass-bg: rgba(255, 255, 255, 0.4);
       --glass-border: rgba(255, 255, 255, 0.6);
@@ -70,25 +70,26 @@
     body::before {
       content: '';
       position: fixed;
-      right: 0;
+      right: -10%;
       top: 0;
-      width: 75%;
+      width: 85%;
       height: 100%;
       background: 
-        radial-gradient(circle at 85% 15%, var(--bg-gradient-1) 0%, transparent 28%),
-        radial-gradient(circle at 92% 35%, var(--bg-gradient-2) 0%, transparent 22%),
-        radial-gradient(circle at 78% 50%, var(--bg-gradient-3) 0%, transparent 32%),
-        radial-gradient(circle at 88% 65%, var(--bg-gradient-4) 0%, transparent 25%),
-        radial-gradient(circle at 95% 78%, var(--bg-gradient-1) 0%, transparent 20%),
-        radial-gradient(circle at 82% 88%, var(--bg-gradient-2) 0%, transparent 28%),
-        radial-gradient(circle at 90% 25%, var(--bg-gradient-3) 0%, transparent 18%),
-        radial-gradient(circle at 75% 70%, var(--bg-gradient-4) 0%, transparent 22%),
-        radial-gradient(circle at 85% 42%, var(--bg-gradient-1) 0%, transparent 20%),
-        radial-gradient(circle at 93% 55%, var(--bg-gradient-2) 0%, transparent 18%),
-        radial-gradient(circle at 65% 30%, var(--bg-gradient-3) 0%, transparent 20%),
-        radial-gradient(circle at 70% 85%, var(--bg-gradient-4) 0%, transparent 24%);
-      opacity: 0.65;
-      filter: blur(70px);
+        radial-gradient(circle at 85% 12%, var(--bg-gradient-1) 0%, transparent 30%),
+        radial-gradient(circle at 92% 28%, var(--bg-gradient-2) 0%, transparent 25%),
+        radial-gradient(circle at 78% 45%, var(--bg-gradient-3) 0%, transparent 35%),
+        radial-gradient(circle at 88% 62%, var(--bg-gradient-4) 0%, transparent 28%),
+        radial-gradient(circle at 95% 78%, var(--bg-gradient-5) 0%, transparent 22%),
+        radial-gradient(circle at 82% 88%, var(--bg-gradient-1) 0%, transparent 30%),
+        radial-gradient(circle at 72% 25%, var(--bg-gradient-2) 0%, transparent 20%),
+        radial-gradient(circle at 75% 68%, var(--bg-gradient-3) 0%, transparent 24%),
+        radial-gradient(circle at 85% 38%, var(--bg-gradient-4) 0%, transparent 22%),
+        radial-gradient(circle at 93% 52%, var(--bg-gradient-5) 0%, transparent 20%),
+        radial-gradient(circle at 65% 32%, var(--bg-gradient-1) 0%, transparent 22%),
+        radial-gradient(circle at 70% 82%, var(--bg-gradient-2) 0%, transparent 26%),
+        radial-gradient(circle at 60% 58%, var(--bg-gradient-3) 0%, transparent 20%);
+      opacity: 0.7;
+      filter: blur(80px);
       z-index: 0;
       pointer-events: none;
       animation: bubbleFloat 25s ease-in-out infinite;
