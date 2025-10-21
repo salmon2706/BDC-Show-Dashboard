@@ -1289,10 +1289,21 @@
 </head>
 <body>
   <!-- Modern Display Corners -->
-  <div class="screen-corner top-left"></div>
-  <div class="screen-corner top-right"></div>
-  <div class="screen-corner bottom-left"></div>
-  <div class="screen-corner bottom-right"></div>
+  <svg class="screen-corner top-left" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 0,0 L 32,0 L 32,32 Q 32,0 0,0 Z" fill="black"/>
+  </svg>
+  
+  <svg class="screen-corner top-right" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 32,0 L 0,0 L 0,32 Q 0,0 32,0 Z" fill="black"/>
+  </svg>
+  
+  <svg class="screen-corner bottom-left" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 0,32 L 0,0 L 32,0 Q 0,0 0,32 Z" fill="black"/>
+  </svg>
+  
+  <svg class="screen-corner bottom-right" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 32,32 L 32,0 L 0,0 Q 32,0 32,32 Z" fill="black"/>
+  </svg>
   
   <div class="version-badge">v1.2.8</div>
   
