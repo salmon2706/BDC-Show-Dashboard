@@ -129,19 +129,13 @@
     }
     
     .version-badge {
-      position: fixed;
-      top: 8px;
-      right: 8px;
-      font-size: 8px;
+      font-size: 10px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-tertiary);
       letter-spacing: 0.05em;
-      z-index: 1000;
-      padding: 3px 6px;
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 4px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
     }
     
     /* Modern display corners - macOS/iPad style */
@@ -1300,8 +1294,6 @@
     <path d="M 96,96 L 96,0 Q 96,96 0,96 L 96,96 Z" fill="black"/>
   </svg>
   
-  <div class="version-badge">v1.2.9</div>
-  
   <div class="app" id="app">
     <!-- Navigation -->
     <nav class="navbar">
@@ -1466,7 +1458,10 @@
   <!-- Settings Panel -->
   <aside class="settings-panel" id="settingsPanel">
     <div class="settings-header">
-      <h2 class="settings-title">Settings</h2>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <h2 class="settings-title">Settings</h2>
+        <div class="version-badge">v1.2.9</div>
+      </div>
       <button class="btn-text" id="btnCloseSettings">Done</button>
     </div>
     
