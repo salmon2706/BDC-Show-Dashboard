@@ -678,14 +678,14 @@
     .product-showcase {
       position: fixed;
       left: 0;
-      top: 114px;
+      top: 119px;
       bottom: 0;
       width: 420px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 32px 32px 32px;
+      padding: 10px 32px 24px 32px;
       z-index: 50;
       opacity: 0;
       visibility: hidden;
@@ -700,20 +700,20 @@
     
     .product-image-container {
       width: 100%;
-      max-width: 340px;
+      max-width: 300px;
       position: relative;
-      margin-top: -20px;
+      margin-top: 0;
     }
     
     .product-status-overlay {
       position: absolute;
-      bottom: -10px;
+      bottom: 0;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       opacity: 1;
       transition: opacity 0.4s ease;
       z-index: 100;
@@ -883,12 +883,13 @@
     
     .product-badge {
       text-align: center;
-      padding: 6px;
-      font-size: 12px;
+      padding: 4px;
+      font-size: 11px;
       font-weight: 500;
       color: var(--text-secondary);
       width: 100%;
-      max-width: 320px;
+      max-width: 280px;
+      margin-bottom: 8px;
     }
     
     
