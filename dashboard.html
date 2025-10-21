@@ -1254,7 +1254,7 @@
   </style>
 </head>
 <body>
-  <div class="version-badge">v1.2.6</div>
+  <div class="version-badge">v1.2.7</div>
   
   <div class="app" id="app">
     <!-- Navigation -->
@@ -2009,8 +2009,8 @@
       updateSavingsDisplay() {
         const numCycles = this.state.cycles.length;
         const baseline = BASELINES[this.comparisonMode];
-        const label = this.comparisonMode === 'handwash' ? 'Water Saved vs Handwash' : 'Water Saved vs Dishwash';
-        const energyLabel = this.comparisonMode === 'handwash' ? 'Energy Saved vs Handwash' : 'Energy Saved vs Dishwash';
+        const label = this.comparisonMode === 'handwash' ? 'Water Saved vs Handwash' : 'Water Saved vs Dishwasher';
+        const energyLabel = this.comparisonMode === 'handwash' ? 'Energy Saved vs Handwash' : 'Energy Saved vs Dishwasher';
         
         // Water savings
         const baselineWaterTotal = (numCycles * baseline.water) / 1000; // L
