@@ -6,12 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#ffffff" />
-  <title>impactOS Dashboard · Business Design Centre</title>
+  <title>impactOS Dashboard</title>
   
   <style>
-    /* ============================================
-       Apple-Style Liquid Glass Design
-       ============================================ */
     
     * { box-sizing: border-box; }
     
@@ -1333,9 +1330,6 @@
   <div class="toast" id="toast">Saved</div>
 
   <script>
-    // ============================================
-    // Constants & Configuration
-    // ============================================
     
     const DEVICE = {
       cycleTime: 25,         // 25 seconds per cycle
@@ -1354,28 +1348,15 @@
       }
     };
     
-    const CUP_COST = 0.30; // £0.30 per paper cup
+    const CUP_COST = 0.30;
     
     const DEFAULT_CONFIG = {
-      baselines: {
-        handWashWater: 1000,    // mL
-        handWashEnergy: 0.05,   // kWh
-        manualTime: 45,         // seconds
-      },
-      tariffs: {
-        water: 2.50,            // £/m³
-        energy: 0.30,           // £/kWh
-        staff: 15.00,           // £/hour
-      },
-      simulator: {
-        cyclesPerHour: 30,
-      },
+      baselines: { handWashWater: 1000, handWashEnergy: 0.05, manualTime: 45 },
+      tariffs: { water: 2.50, energy: 0.30, staff: 15.00 },
+      simulator: { cyclesPerHour: 30 },
       pin: '2468',
     };
     
-    // ============================================
-    // State Management
-    // ============================================
     
     class DashboardState {
       constructor() {
@@ -1459,9 +1440,6 @@
       }
     }
     
-    // ============================================
-    // UI Controller
-    // ============================================
     
     class DashboardUI {
       constructor(state) {
@@ -2029,14 +2007,8 @@
       }
     }
     
-    // ============================================
-    // Initialize Dashboard
-    // ============================================
-    
     const state = new DashboardState();
     const ui = new DashboardUI(state);
-    
-    console.log('impactOS Dashboard initialized · Business Design Centre');
   </script>
 </body>
 </html>
