@@ -1254,7 +1254,7 @@
   </style>
 </head>
 <body>
-  <div class="version-badge">v1.2.7</div>
+  <div class="version-badge">v1.2.8</div>
   
   <div class="app" id="app">
     <!-- Navigation -->
@@ -1426,18 +1426,38 @@
     
     <div class="settings-body">
       <div class="form-section">
-        <h3 class="form-section-title">Baselines (per item)</h3>
+        <h3 class="form-section-title">Handwash Baselines (per cup)</h3>
         <div class="form-row">
-          <label class="form-label" for="baselineWater">Hand wash water (mL)</label>
+          <label class="form-label" for="baselineWater">Water (mL)</label>
           <input type="number" class="form-input" id="baselineWater" min="0" step="10" />
         </div>
         <div class="form-row">
-          <label class="form-label" for="baselineEnergy">Hand wash energy (kWh)</label>
+          <label class="form-label" for="baselineEnergy">Energy (kWh)</label>
           <input type="number" class="form-input" id="baselineEnergy" min="0" step="0.001" />
         </div>
+      </div>
+      
+      <div class="form-section">
+        <h3 class="form-section-title">Dishwasher Baselines (per cup)</h3>
+        <div class="form-row">
+          <label class="form-label" for="dishwasherWater">Water (mL)</label>
+          <input type="number" class="form-input" id="dishwasherWater" min="0" step="10" />
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="dishwasherEnergy">Energy (kWh)</label>
+          <input type="number" class="form-input" id="dishwasherEnergy" min="0" step="0.001" />
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3 class="form-section-title">Other Settings</h3>
         <div class="form-row">
           <label class="form-label" for="baselineTime">Manual time (seconds)</label>
           <input type="number" class="form-input" id="baselineTime" min="0" step="5" />
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="cupCost">Cup cost (£)</label>
+          <input type="number" class="form-input" id="cupCost" min="0" step="0.01" />
         </div>
       </div>
       
@@ -1659,7 +1679,10 @@
           btnRestore: document.getElementById('btnRestore'),
           baselineWater: document.getElementById('baselineWater'),
           baselineEnergy: document.getElementById('baselineEnergy'),
+          dishwasherWater: document.getElementById('dishwasherWater'),
+          dishwasherEnergy: document.getElementById('dishwasherEnergy'),
           baselineTime: document.getElementById('baselineTime'),
+          cupCost: document.getElementById('cupCost'),
           tariffWater: document.getElementById('tariffWater'),
           tariffEnergy: document.getElementById('tariffEnergy'),
           tariffStaff: document.getElementById('tariffStaff'),
@@ -1721,9 +1744,12 @@
       }
       
       loadSettingsForm() {
-        this.elements.baselineWater.value = this.state.config.baselines.handWashWater;
-        this.elements.baselineEnergy.value = this.state.config.baselines.handWashEnergy;
+        this.elements.baselineWater.value = BASELINES.handwash.water;
+        this.elements.baselineEnergy.value = BASELINES.handwash.energy;
+        this.elements.dishwasherWater.value = BASELINES.dishwash.water;
+        this.elements.dishwasherEnergy.value = BASELINES.dishwash.energy;
         this.elements.baselineTime.value = this.state.config.baselines.manualTime;
+        this.elements.cupCost.value = CUP_COST;
         this.elements.tariffWater.value = this.state.config.tariffs.water;
         this.elements.tariffEnergy.value = this.state.config.tariffs.energy;
         this.elements.tariffStaff.value = this.state.config.tariffs.staff;
@@ -1743,8 +1769,13 @@
           return;
         }
         
-        this.state.config.baselines.handWashWater = parseFloat(this.elements.baselineWater.value) || DEFAULT_CONFIG.baselines.handWashWater;
-        this.state.config.baselines.handWashEnergy = parseFloat(this.elements.baselineEnergy.value) || DEFAULT_CONFIG.baselines.handWashEnergy;
+        BASELINES.handwash.water = parseFloat(this.elements.baselineWater.value) || 1000;
+        BASELINES.handwash.energy = parseFloat(this.elements.baselineEnergy.value) || 0.08;
+        BASELINES.dishwash.water = parseFloat(this.elements.dishwasherWater.value) || 250;
+        BASELINES.dishwash.energy = parseFloat(this.elements.dishwasherEnergy.value) || 0.032;
+        
+        this.state.config.baselines.handWashWater = BASELINES.handwash.water;
+        this.state.config.baselines.handWashEnergy = BASELINES.handwash.energy;
         this.state.config.baselines.manualTime = parseFloat(this.elements.baselineTime.value) || DEFAULT_CONFIG.baselines.manualTime;
         this.state.config.tariffs.water = parseFloat(this.elements.tariffWater.value) || DEFAULT_CONFIG.tariffs.water;
         this.state.config.tariffs.energy = parseFloat(this.elements.tariffEnergy.value) || DEFAULT_CONFIG.tariffs.energy;
@@ -1752,6 +1783,7 @@
         this.state.config.simulator.cyclesPerHour = parseInt(this.elements.simCyclesPerHour.value) || DEFAULT_CONFIG.simulator.cyclesPerHour;
         
         this.state.save();
+        this.render();
         this.showToast('Settings saved');
         this.closeSettings();
       }
@@ -1762,8 +1794,14 @@
           return;
         }
         
+        BASELINES.handwash.water = 1000;
+        BASELINES.handwash.energy = 0.08;
+        BASELINES.dishwash.water = 250;
+        BASELINES.dishwash.energy = 0.032;
+        
         this.state.config = { ...DEFAULT_CONFIG };
         this.loadSettingsForm();
+        this.render();
         this.showToast('Defaults restored');
       }
       
