@@ -455,8 +455,8 @@
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      margin-bottom: 24px;
+      gap: 18px;
+      margin-bottom: 32px;
     }
     
     .metric-card.alternating {
@@ -475,9 +475,8 @@
       backdrop-filter: blur(50px) saturate(180%);
       -webkit-backdrop-filter: blur(50px) saturate(180%);
       border: 1.5px solid transparent;
-      border-radius: 24px;
-      padding: 28px;
-      min-height: 160px;
+      border-radius: 22px;
+      padding: 24px;
       box-shadow: 
         0 8px 32px rgba(31, 38, 135, 0.12),
         0 2px 8px rgba(0, 0, 0, 0.06),
@@ -561,12 +560,12 @@
     }
     
     .metric-label {
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       position: relative;
     }
     
@@ -592,12 +591,12 @@
     }
     
     .metric-value {
-      font-size: 52px;
+      font-size: 44px;
       font-weight: 700;
       letter-spacing: -0.04em;
       color: var(--text-primary);
       line-height: 1.1;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     
     
@@ -747,13 +746,13 @@
     
     .product-status-overlay {
       position: absolute;
-      bottom: -20px;
+      bottom: 5px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       opacity: 1;
       transition: opacity 0.4s ease;
       z-index: 100;
@@ -763,8 +762,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      height: 60px;
+      gap: 4px;
+      height: 50px;
       animation: waveformFadeIn 0.6s ease-out;
     }
     
@@ -780,7 +779,7 @@
     }
     
     .product-status-text {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 600;
       color: #6e6e73;
       letter-spacing: 0.02em;
@@ -799,12 +798,12 @@
     }
     
     .product-wave-bar {
-      width: 6px;
+      width: 5px;
       background: linear-gradient(180deg, 
         rgba(0, 122, 255, 0.9), 
         rgba(0, 212, 255, 0.9));
-      border-radius: 3px;
-      box-shadow: 0 0 12px rgba(0, 122, 255, 0.4);
+      border-radius: 2.5px;
+      box-shadow: 0 0 10px rgba(0, 122, 255, 0.4);
       opacity: 0.8;
     }
     
@@ -813,19 +812,19 @@
       opacity: 1;
     }
     
-    .product-wave-bar:nth-child(1) { animation-delay: 0s; height: 18px; }
-    .product-wave-bar:nth-child(2) { animation-delay: 0.15s; height: 24px; }
-    .product-wave-bar:nth-child(3) { animation-delay: 0.3s; height: 36px; }
-    .product-wave-bar:nth-child(4) { animation-delay: 0.45s; height: 48px; }
-    .product-wave-bar:nth-child(5) { animation-delay: 0.6s; height: 54px; }
-    .product-wave-bar:nth-child(6) { animation-delay: 0.75s; height: 48px; }
-    .product-wave-bar:nth-child(7) { animation-delay: 0.6s; height: 36px; }
-    .product-wave-bar:nth-child(8) { animation-delay: 0.45s; height: 24px; }
-    .product-wave-bar:nth-child(9) { animation-delay: 0.3s; height: 18px; }
+    .product-wave-bar:nth-child(1) { animation-delay: 0s; height: 15px; }
+    .product-wave-bar:nth-child(2) { animation-delay: 0.15s; height: 20px; }
+    .product-wave-bar:nth-child(3) { animation-delay: 0.3s; height: 30px; }
+    .product-wave-bar:nth-child(4) { animation-delay: 0.45s; height: 40px; }
+    .product-wave-bar:nth-child(5) { animation-delay: 0.6s; height: 45px; }
+    .product-wave-bar:nth-child(6) { animation-delay: 0.75s; height: 40px; }
+    .product-wave-bar:nth-child(7) { animation-delay: 0.6s; height: 30px; }
+    .product-wave-bar:nth-child(8) { animation-delay: 0.45s; height: 20px; }
+    .product-wave-bar:nth-child(9) { animation-delay: 0.3s; height: 15px; }
     
     .product-wave-bar.idle {
       animation: none;
-      height: 6px;
+      height: 5px;
       opacity: 0.6;
     }
     
@@ -1339,14 +1338,14 @@
               Water Usage
               <span class="cycle-badge" id="waterUsageBadge">+50mL</span>
             </div>
-            <div class="metric-value" id="metricWaterUsage">0.00<small style="font-size: 28px; font-weight: 600; margin-left: 4px;">L</small></div>
+            <div class="metric-value" id="metricWaterUsage">0.00<small style="font-size: 26px; font-weight: 600; margin-left: 4px;">L</small></div>
           </div>
           
           <!-- Water Savings (alternating) -->
           <div class="metric-card alternating" data-metric="water-savings">
             <div class="metric-label" id="waterSavingsLabel">Water Saved vs Handwash</div>
-            <div class="metric-value" id="metricWaterSavings">0.00<small style="font-size: 28px; font-weight: 600; margin-left: 4px;">L</small></div>
-            <div style="font-size: 18px; font-weight: 600; margin-top: 10px; color: var(--success);" id="waterSavingsPercent">0% less water</div>
+            <div class="metric-value" id="metricWaterSavings">0.00<small style="font-size: 26px; font-weight: 600; margin-left: 4px;">L</small></div>
+            <div style="font-size: 16px; font-weight: 600; margin-top: 8px; color: var(--success);" id="waterSavingsPercent">0% less water</div>
           </div>
           
           <!-- Energy Usage -->
@@ -1355,14 +1354,14 @@
               Energy Usage
               <span class="cycle-badge" id="energyUsageBadge">+0.009kWh</span>
             </div>
-            <div class="metric-value" id="metricEnergyUsage">0.000<small style="font-size: 28px; font-weight: 600; margin-left: 4px;">kWh</small></div>
+            <div class="metric-value" id="metricEnergyUsage">0.000<small style="font-size: 26px; font-weight: 600; margin-left: 4px;">kWh</small></div>
           </div>
           
           <!-- Energy Savings (alternating) -->
           <div class="metric-card alternating" data-metric="energy-savings">
             <div class="metric-label" id="energySavingsLabel">Energy Saved vs Handwash</div>
-            <div class="metric-value" id="metricEnergySavings">0.000<small style="font-size: 28px; font-weight: 600; margin-left: 4px;">kWh</small></div>
-            <div style="font-size: 18px; font-weight: 600; margin-top: 10px; color: var(--success);" id="energySavingsPercent">0% less energy</div>
+            <div class="metric-value" id="metricEnergySavings">0.000<small style="font-size: 26px; font-weight: 600; margin-left: 4px;">kWh</small></div>
+            <div style="font-size: 16px; font-weight: 600; margin-top: 8px; color: var(--success);" id="energySavingsPercent">0% less energy</div>
           </div>
           
           <!-- Paper Cups Saved -->
@@ -1468,7 +1467,7 @@
     <div class="settings-header">
       <div style="display: flex; align-items: center; gap: 12px;">
         <h2 class="settings-title">Settings</h2>
-        <div class="version-badge">v1.3.6</div>
+        <div class="version-badge">v1.3.7</div>
       </div>
       <button class="btn-text" id="btnCloseSettings">Done</button>
     </div>
