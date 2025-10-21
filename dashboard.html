@@ -19,9 +19,9 @@
       --bg-gradient-3: #ff94d4;
       --bg-gradient-4: #ffd95d;
       
-      --glass-bg: rgba(255, 255, 255, 0.25);
-      --glass-border: rgba(255, 255, 255, 0.4);
-      --glass-shadow: rgba(31, 38, 135, 0.15);
+      --glass-bg: rgba(255, 255, 255, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --glass-shadow: rgba(31, 38, 135, 0.12);
       
       --text-primary: #1d1d1f;
       --text-secondary: #6e6e73;
@@ -35,9 +35,9 @@
       --success: #34c759;
       --success-light: #d1f4da;
       
-      --blur-sm: blur(20px);
-      --blur-md: blur(40px);
-      --blur-lg: blur(60px);
+      --blur-sm: blur(30px);
+      --blur-md: blur(50px);
+      --blur-lg: blur(80px);
       
       --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
       --shadow-float: 0 12px 48px 0 rgba(31, 38, 135, 0.1);
@@ -50,8 +50,10 @@
       overflow: hidden;
     }
     
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
       background: #ffffff;
       position: relative;
       color: var(--text-primary);
@@ -70,21 +72,23 @@
       position: fixed;
       right: 0;
       top: 0;
-      width: 50%;
+      width: 75%;
       height: 100%;
       background: 
-        radial-gradient(circle at 85% 15%, var(--bg-gradient-1) 0%, transparent 25%),
-        radial-gradient(circle at 92% 35%, var(--bg-gradient-2) 0%, transparent 20%),
-        radial-gradient(circle at 78% 50%, var(--bg-gradient-3) 0%, transparent 30%),
-        radial-gradient(circle at 88% 65%, var(--bg-gradient-4) 0%, transparent 22%),
-        radial-gradient(circle at 95% 78%, var(--bg-gradient-1) 0%, transparent 18%),
-        radial-gradient(circle at 82% 88%, var(--bg-gradient-2) 0%, transparent 26%),
-        radial-gradient(circle at 90% 25%, var(--bg-gradient-3) 0%, transparent 15%),
-        radial-gradient(circle at 75% 70%, var(--bg-gradient-4) 0%, transparent 20%),
-        radial-gradient(circle at 85% 42%, var(--bg-gradient-1) 0%, transparent 18%),
-        radial-gradient(circle at 93% 55%, var(--bg-gradient-2) 0%, transparent 16%);
-      opacity: 0.6;
-      filter: blur(60px);
+        radial-gradient(circle at 85% 15%, var(--bg-gradient-1) 0%, transparent 28%),
+        radial-gradient(circle at 92% 35%, var(--bg-gradient-2) 0%, transparent 22%),
+        radial-gradient(circle at 78% 50%, var(--bg-gradient-3) 0%, transparent 32%),
+        radial-gradient(circle at 88% 65%, var(--bg-gradient-4) 0%, transparent 25%),
+        radial-gradient(circle at 95% 78%, var(--bg-gradient-1) 0%, transparent 20%),
+        radial-gradient(circle at 82% 88%, var(--bg-gradient-2) 0%, transparent 28%),
+        radial-gradient(circle at 90% 25%, var(--bg-gradient-3) 0%, transparent 18%),
+        radial-gradient(circle at 75% 70%, var(--bg-gradient-4) 0%, transparent 22%),
+        radial-gradient(circle at 85% 42%, var(--bg-gradient-1) 0%, transparent 20%),
+        radial-gradient(circle at 93% 55%, var(--bg-gradient-2) 0%, transparent 18%),
+        radial-gradient(circle at 65% 30%, var(--bg-gradient-3) 0%, transparent 20%),
+        radial-gradient(circle at 70% 85%, var(--bg-gradient-4) 0%, transparent 24%);
+      opacity: 0.65;
+      filter: blur(70px);
       z-index: 0;
       pointer-events: none;
       animation: bubbleFloat 25s ease-in-out infinite;
@@ -408,7 +412,10 @@
       border: 1.5px solid var(--glass-border);
       border-radius: 20px;
       padding: 20px;
-      box-shadow: var(--shadow-glass);
+      box-shadow: 
+        0 4px 16px rgba(31, 38, 135, 0.08),
+        0 1px 4px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
       overflow: hidden;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -502,7 +509,10 @@
       border-radius: 24px;
       padding: 32px;
       margin-bottom: 28px;
-      box-shadow: var(--shadow-glass);
+      box-shadow: 
+        0 4px 16px rgba(31, 38, 135, 0.08),
+        0 1px 4px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
     
     .panel-header {
@@ -693,37 +703,62 @@
     .product-checkmark {
       width: 36px;
       height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #34c759, #30d158);
-      display: grid;
-      place-items: center;
-      font-size: 20px;
-      font-weight: 700;
-      color: white;
-      box-shadow: 
-        0 4px 12px rgba(52, 199, 89, 0.35),
-        inset 0 1px 2px rgba(255, 255, 255, 0.4);
-      animation: checkPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
     }
     
-    .product-checkmark::before {
-      content: '✓';
-      position: absolute;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    .check-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #34c759, #30d158);
+      box-shadow: 
+        0 4px 16px rgba(52, 199, 89, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+      animation: circleExpand 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    @keyframes checkPop {
+    .check-path {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 18px;
+      height: 18px;
+      transform: translate(-50%, -50%);
+    }
+    
+    .check-path svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .check-path path {
+      fill: none;
+      stroke: white;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 24;
+      stroke-dashoffset: 24;
+      animation: checkDraw 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+    }
+    
+    @keyframes circleExpand {
       0% {
-        transform: scale(0) rotate(-45deg);
+        transform: scale(0);
         opacity: 0;
       }
-      70% {
-        transform: scale(1.15) rotate(5deg);
+      60% {
+        transform: scale(1.1);
       }
       100% {
-        transform: scale(1) rotate(0);
+        transform: scale(1);
         opacity: 1;
+      }
+    }
+    
+    @keyframes checkDraw {
+      to {
+        stroke-dashoffset: 0;
       }
     }
     
@@ -1136,14 +1171,13 @@
               <span class="cycle-badge" id="waterUsageBadge">+50mL</span>
             </div>
             <div class="metric-value" id="metricWaterUsage">0.00<small style="font-size: 20px; font-weight: 600; margin-left: 4px;">L</small></div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">instarinse® total</div>
           </div>
           
           <!-- Water Savings (alternating) -->
           <div class="metric-card alternating" data-metric="water-savings">
-            <div class="metric-label" id="waterSavingsLabel">vs Handwash</div>
+            <div class="metric-label" id="waterSavingsLabel">Water Saved vs Handwash</div>
             <div class="metric-value" id="metricWaterSavings">0.00<small style="font-size: 20px; font-weight: 600; margin-left: 4px;">L</small></div>
-            <div style="font-size: 14px; font-weight: 600; margin-top: 6px;" id="waterSavingsPercent">0% less water</div>
+            <div style="font-size: 14px; font-weight: 600; margin-top: 6px; color: var(--success);" id="waterSavingsPercent">0% less water</div>
           </div>
           
           <!-- Energy Usage -->
@@ -1153,28 +1187,25 @@
               <span class="cycle-badge" id="energyUsageBadge">+0.009kWh</span>
             </div>
             <div class="metric-value" id="metricEnergyUsage">0.000<small style="font-size: 20px; font-weight: 600; margin-left: 4px;">kWh</small></div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">instarinse® total</div>
           </div>
           
           <!-- Energy Savings (alternating) -->
           <div class="metric-card alternating" data-metric="energy-savings">
-            <div class="metric-label" id="energySavingsLabel">vs Handwash</div>
+            <div class="metric-label" id="energySavingsLabel">Energy Saved vs Handwash</div>
             <div class="metric-value" id="metricEnergySavings">0.000<small style="font-size: 20px; font-weight: 600; margin-left: 4px;">kWh</small></div>
-            <div style="font-size: 14px; font-weight: 600; margin-top: 6px;" id="energySavingsPercent">0% less energy</div>
+            <div style="font-size: 14px; font-weight: 600; margin-top: 6px; color: var(--success);" id="energySavingsPercent">0% less energy</div>
           </div>
           
           <!-- Paper Cups Saved -->
           <div class="metric-card" data-metric="cups">
             <div class="metric-label">Paper Cups Saved</div>
             <div class="metric-value" id="metricCups">0</div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">disposable cups avoided</div>
           </div>
           
           <!-- Cup Cost Saved -->
           <div class="metric-card" data-metric="cup-cost">
             <div class="metric-label">Cup Cost Saved</div>
             <div class="metric-value" id="metricCupCost">£0.00</div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">@ £0.30 per cup</div>
           </div>
         </div>
         
@@ -1788,7 +1819,14 @@
       showProductCheckmark() {
         const overlay = document.getElementById('productStatusOverlay');
         overlay.innerHTML = `
-          <div class="product-checkmark"></div>
+          <div class="product-checkmark">
+            <div class="check-circle"></div>
+            <div class="check-path">
+              <svg viewBox="0 0 24 24">
+                <path d="M6 12l4 4 8-8"/>
+              </svg>
+            </div>
+          </div>
           <div class="product-status-text">Complete</div>
         `;
       }
@@ -1848,7 +1886,8 @@
       updateSavingsDisplay() {
         const numCycles = this.state.cycles.length;
         const baseline = BASELINES[this.comparisonMode];
-        const label = this.comparisonMode === 'handwash' ? 'vs Handwash' : 'vs Dishwash';
+        const label = this.comparisonMode === 'handwash' ? 'Water Saved vs Handwash' : 'Water Saved vs Dishwash';
+        const energyLabel = this.comparisonMode === 'handwash' ? 'Energy Saved vs Handwash' : 'Energy Saved vs Dishwash';
         
         // Water savings
         const baselineWaterTotal = (numCycles * baseline.water) / 1000; // L
@@ -1866,8 +1905,8 @@
         const energySaved = baselineEnergyTotal - actualEnergyUsed;
         const energyPercent = baselineEnergyTotal > 0 ? ((energySaved / baselineEnergyTotal) * 100) : 0;
         
-        this.elements.energySavingsLabel.textContent = label;
-        this.elements.metricEnergySavings.innerHTML = `${energySaved.toFixed(3)}<small style="font-size: 24px; font-weight: 600; margin-left: 4px;">kWh</small>`;
+        this.elements.energySavingsLabel.textContent = energyLabel;
+        this.elements.metricEnergySavings.innerHTML = `${energySaved.toFixed(3)}<small style="font-size: 20px; font-weight: 600; margin-left: 4px;">kWh</small>`;
         this.elements.energySavingsPercent.textContent = `${Math.round(energyPercent)}% less energy`;
       }
       
