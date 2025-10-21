@@ -144,66 +144,38 @@
       -webkit-backdrop-filter: blur(10px);
     }
     
-    /* Modern display corners - macOS/iPad style */
+    /* Modern display corners - macOS/iPad style (convex) */
     .screen-corner {
       position: fixed;
       width: 32px;
       height: 32px;
-      overflow: hidden;
+      background: black;
       z-index: 9999;
       pointer-events: none;
-    }
-    
-    .screen-corner::before {
-      content: '';
-      position: absolute;
-      width: 64px;
-      height: 64px;
-      background: black;
     }
     
     .screen-corner.top-left {
       top: 0;
       left: 0;
-    }
-    
-    .screen-corner.top-left::before {
-      bottom: 0;
-      right: 0;
-      border-radius: 0 0 64px 0;
+      border-bottom-right-radius: 32px;
     }
     
     .screen-corner.top-right {
       top: 0;
       right: 0;
-    }
-    
-    .screen-corner.top-right::before {
-      bottom: 0;
-      left: 0;
-      border-radius: 0 0 0 64px;
+      border-bottom-left-radius: 32px;
     }
     
     .screen-corner.bottom-left {
       bottom: 0;
       left: 0;
-    }
-    
-    .screen-corner.bottom-left::before {
-      top: 0;
-      right: 0;
-      border-radius: 0 64px 0 0;
+      border-top-right-radius: 32px;
     }
     
     .screen-corner.bottom-right {
       bottom: 0;
       right: 0;
-    }
-    
-    .screen-corner.bottom-right::before {
-      top: 0;
-      left: 0;
-      border-radius: 64px 0 0 0;
+      border-top-left-radius: 32px;
     }
     
     /* ============================================
