@@ -145,19 +145,62 @@
     }
     
     /* Modern display corners - macOS/iPad style */
-    body::after {
-      content: '';
+    .screen-corner {
       position: fixed;
-      inset: 0;
-      pointer-events: none;
+      width: 32px;
+      height: 32px;
+      background: black;
       z-index: 9999;
-      background: 
-        radial-gradient(circle at 32px 32px, transparent 32px, black 33px) top left,
-        radial-gradient(circle at calc(100% - 32px) 32px, transparent 32px, black 33px) top right,
-        radial-gradient(circle at 32px calc(100% - 32px), transparent 32px, black 33px) bottom left,
-        radial-gradient(circle at calc(100% - 32px) calc(100% - 32px), transparent 32px, black 33px) bottom right;
-      background-size: 51% 51%;
-      background-repeat: no-repeat;
+      pointer-events: none;
+    }
+    
+    .screen-corner::after {
+      content: '';
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: white;
+      border-radius: 50%;
+    }
+    
+    .screen-corner.top-left {
+      top: 0;
+      left: 0;
+    }
+    
+    .screen-corner.top-left::after {
+      bottom: 0;
+      right: 0;
+    }
+    
+    .screen-corner.top-right {
+      top: 0;
+      right: 0;
+    }
+    
+    .screen-corner.top-right::after {
+      bottom: 0;
+      left: 0;
+    }
+    
+    .screen-corner.bottom-left {
+      bottom: 0;
+      left: 0;
+    }
+    
+    .screen-corner.bottom-left::after {
+      top: 0;
+      right: 0;
+    }
+    
+    .screen-corner.bottom-right {
+      bottom: 0;
+      right: 0;
+    }
+    
+    .screen-corner.bottom-right::after {
+      top: 0;
+      left: 0;
     }
     
     /* ============================================
@@ -1270,6 +1313,12 @@
   </style>
 </head>
 <body>
+  <!-- Modern Display Corners -->
+  <div class="screen-corner top-left"></div>
+  <div class="screen-corner top-right"></div>
+  <div class="screen-corner bottom-left"></div>
+  <div class="screen-corner bottom-right"></div>
+  
   <div class="version-badge">v1.2.8</div>
   
   <div class="app" id="app">
