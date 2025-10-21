@@ -144,6 +144,40 @@
       -webkit-backdrop-filter: blur(10px);
     }
     
+    /* Modern display corners - macOS style */
+    .screen-corner {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      background: #000000;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    
+    .screen-corner.top-left {
+      top: 0;
+      left: 0;
+      border-bottom-right-radius: 24px;
+    }
+    
+    .screen-corner.top-right {
+      top: 0;
+      right: 0;
+      border-bottom-left-radius: 24px;
+    }
+    
+    .screen-corner.bottom-left {
+      bottom: 0;
+      left: 0;
+      border-top-right-radius: 24px;
+    }
+    
+    .screen-corner.bottom-right {
+      bottom: 0;
+      right: 0;
+      border-top-left-radius: 24px;
+    }
+    
     /* ============================================
        Layout
        ============================================ */
@@ -1254,6 +1288,12 @@
   </style>
 </head>
 <body>
+  <!-- Modern Display Corners -->
+  <div class="screen-corner top-left"></div>
+  <div class="screen-corner top-right"></div>
+  <div class="screen-corner bottom-left"></div>
+  <div class="screen-corner bottom-right"></div>
+  
   <div class="version-badge">v1.2.8</div>
   
   <div class="app" id="app">
