@@ -8,6 +8,10 @@
   <meta name="theme-color" content="#ffffff" />
   <title>impactOS Dashboard</title>
   
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  
   <style>
     
     * { box-sizing: border-box; }
@@ -1443,7 +1447,9 @@
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <button class="btn btn-secondary" id="btnExport">Export CSV</button>
             <button class="btn btn-secondary" id="btnReset">Reset Today</button>
-            <button class="btn btn-primary" id="btnSimulator">Simulator: <span id="simStatus">Off</span></button>
+          </div>
+          <div id="connectionStatus" style="margin-top: 16px; padding: 12px; background: rgba(0, 122, 255, 0.1); border-radius: 12px; font-size: 14px; color: #007aff;">
+            <strong>🔄 Connecting...</strong> Device KIR-5575
           </div>
         </div>
       </div>
@@ -1469,7 +1475,7 @@
     <div class="settings-header">
       <div style="display: flex; align-items: center; gap: 12px;">
         <h2 class="settings-title">Settings</h2>
-        <div class="version-badge">v1.3.8</div>
+        <div class="version-badge">v2.0.0</div>
       </div>
       <button class="btn-text" id="btnCloseSettings">Done</button>
     </div>
@@ -1528,14 +1534,6 @@
       </div>
       
       <div class="form-section">
-        <h3 class="form-section-title">Simulator</h3>
-        <div class="form-row">
-          <label class="form-label" for="simCyclesPerHour">Cycles per hour</label>
-          <input type="number" class="form-input" id="simCyclesPerHour" min="1" max="120" step="1" />
-        </div>
-      </div>
-      
-      <div class="form-section">
         <h3 class="form-section-title">PIN Protection</h3>
         <div class="form-row">
           <label class="form-label" for="pinInput">Enter PIN (default: 2468)</label>
@@ -1554,11 +1552,25 @@
   <div class="toast" id="toast">Saved</div>
 
   <script>
+    // ============================================
+    // Firebase Configuration
+    // ============================================
+    const FIREBASE_CONFIG = {
+      databaseURL: "https://test-database-8f390-default-rtdb.europe-west1.firebasedatabase.app"
+    };
     
+    // Initialize Firebase
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const database = firebase.database();
+    
+    // ============================================
+    // Device Configuration
+    // ============================================
     const DEVICE = {
-      cycleTime: 25,         // 25 seconds per cycle
-      waterUsage: 50,        // ~50 mL per cycle
-      energyUsage: 0.009,    // ~0.009 kWh per cycle
+      serialNumbers: ['KIR-5575', 'No QR'],  // Device serials to track
+      cycleTime: 25,                         // 25 seconds per cycle
+      waterUsage: 50,                        // 50 mL per cycle
+      energyUsage: 0.009,                    // 0.009 kWh per cycle
     };
     
     const BASELINES = {
@@ -1577,7 +1589,6 @@
     const DEFAULT_CONFIG = {
       baselines: { handWashWater: 1000, handWashEnergy: 0.05, manualTime: 45 },
       tariffs: { water: 2.50, energy: 0.30, staff: 15.00 },
-      simulator: { cyclesPerHour: 30 },
       pin: '2468',
     };
     
@@ -1594,6 +1605,11 @@
         };
         this.sessionDate = new Date().toDateString();
         this.unlocked = false;
+        this.lastCounters = {};  // Track last known counter per device
+        // Initialize counters for each device
+        DEVICE.serialNumbers.forEach(serial => {
+          this.lastCounters[serial] = 0;
+        });
         this.load();
       }
       
@@ -1609,6 +1625,7 @@
               this.cycles = data.cycles || [];
               this.totals = data.totals || this.totals;
               this.config = { ...DEFAULT_CONFIG, ...data.config };
+              this.lastCounters = data.lastCounters || this.lastCounters;
             }
           }
         } catch (e) {
@@ -1623,6 +1640,7 @@
             cycles: this.cycles,
             totals: this.totals,
             config: this.config,
+            lastCounters: this.lastCounters,
           }));
         } catch (e) {
           console.error('Failed to save state:', e);
@@ -1633,6 +1651,9 @@
         this.cycles = [];
         this.totals = { water: 0, energy: 0, time: 0, cost: 0 };
         this.sessionDate = new Date().toDateString();
+        DEVICE.serialNumbers.forEach(serial => {
+          this.lastCounters[serial] = 0;
+        });
         this.save();
       }
       
@@ -1669,7 +1690,6 @@
       constructor(state) {
         this.state = state;
         this.elements = this.getElements();
-        this.simulatorInterval = null;
         this.comparisonMode = 'handwash'; // 'handwash' or 'dishwash'
         this.alternateInterval = null;
         this.tapCount = 0;
@@ -1678,6 +1698,7 @@
         this.render();
         this.startClock();
         this.startAlternating();
+        this.startFirebaseListener(); // Start listening for real data
         
         // Start with product showcase visible
         document.getElementById('productShowcase').classList.add('show');
@@ -1717,10 +1738,8 @@
           
           // Controls
           btnSettings: document.getElementById('btnSettings'),
-          btnSimulator: document.getElementById('btnSimulator'),
           btnExport: document.getElementById('btnExport'),
           btnReset: document.getElementById('btnReset'),
-          simStatus: document.getElementById('simStatus'),
           
           // Settings
           settingsPanel: document.getElementById('settingsPanel'),
@@ -1736,7 +1755,6 @@
           tariffWater: document.getElementById('tariffWater'),
           tariffEnergy: document.getElementById('tariffEnergy'),
           tariffStaff: document.getElementById('tariffStaff'),
-          simCyclesPerHour: document.getElementById('simCyclesPerHour'),
           pinInput: document.getElementById('pinInput'),
           
           // Toast
@@ -1758,7 +1776,6 @@
         this.elements.pinInput.addEventListener('input', () => this.checkPin());
         
         // Actions
-        this.elements.btnSimulator.addEventListener('click', () => this.toggleSimulator());
         this.elements.btnExport.addEventListener('click', () => this.exportData());
         this.elements.btnReset.addEventListener('click', () => this.resetDay());
         
@@ -1803,7 +1820,6 @@
         this.elements.tariffWater.value = this.state.config.tariffs.water;
         this.elements.tariffEnergy.value = this.state.config.tariffs.energy;
         this.elements.tariffStaff.value = this.state.config.tariffs.staff;
-        this.elements.simCyclesPerHour.value = this.state.config.simulator.cyclesPerHour;
       }
       
       checkPin() {
@@ -1830,7 +1846,6 @@
         this.state.config.tariffs.water = parseFloat(this.elements.tariffWater.value) || DEFAULT_CONFIG.tariffs.water;
         this.state.config.tariffs.energy = parseFloat(this.elements.tariffEnergy.value) || DEFAULT_CONFIG.tariffs.energy;
         this.state.config.tariffs.staff = parseFloat(this.elements.tariffStaff.value) || DEFAULT_CONFIG.tariffs.staff;
-        this.state.config.simulator.cyclesPerHour = parseInt(this.elements.simCyclesPerHour.value) || DEFAULT_CONFIG.simulator.cyclesPerHour;
         
         this.state.save();
         this.render();
@@ -1863,168 +1878,114 @@
         }, 2000);
       }
       
-      toggleSimulator() {
-        if (this.simulatorInterval) {
-          this.stopSimulator();
-        } else {
-          this.startSimulator();
+      startFirebaseListener() {
+        console.log(`Starting Firebase listener for devices: ${DEVICE.serialNumbers.join(', ')}`);
+        
+        // Listen to ALL counter_values and filter by serial number
+        const counterRef = database.ref('counter_values');
+        
+        counterRef.on('child_added', (snapshot) => {
+          const data = snapshot.val();
+          // Only process if it's one of our tracked devices
+          if (data && DEVICE.serialNumbers.includes(data.serial_number)) {
+            this.handleFirebaseData(data);
+          }
+        });
+        
+        // Handle connection status
+        const connectedRef = database.ref('.info/connected');
+        connectedRef.on('value', (snap) => {
+          const statusEl = document.getElementById('connectionStatus');
+          if (snap.val() === true) {
+            console.log('✓ Connected to Firebase');
+            if (statusEl) {
+              statusEl.innerHTML = `<strong>✓ Live:</strong> Tracking ${DEVICE.serialNumbers.length} devices`;
+              statusEl.style.background = 'rgba(52, 199, 89, 0.1)';
+              statusEl.style.color = '#34c759';
+            }
+          } else {
+            console.log('✗ Disconnected from Firebase');
+            if (statusEl) {
+              statusEl.innerHTML = '<strong>✗ Offline:</strong> Reconnecting...';
+              statusEl.style.background = 'rgba(255, 149, 0, 0.1)';
+              statusEl.style.color = '#ff9500';
+            }
+          }
+        });
+      }
+      
+      handleFirebaseData(data) {
+        const { counter, timestamp, serial_number } = data;
+        const lastCounter = this.state.lastCounters[serial_number] || 0;
+        
+        console.log('Firebase data received:', { 
+          serial: serial_number, 
+          counter, 
+          timestamp, 
+          lastCounter 
+        });
+        
+        // Check if this is a NEW cycle (counter increased)
+        if (counter > lastCounter) {
+          const cycleCount = counter - lastCounter;
+          console.log(`✓ NEW CYCLE DETECTED [${serial_number}]! Counter: ${lastCounter} → ${counter} (+${cycleCount})`);
+          
+          // Update last known counter for this device
+          this.state.lastCounters[serial_number] = counter;
+          this.state.save();
+          
+          // Process each new cycle
+          for (let i = 0; i < cycleCount; i++) {
+            this.recordCycle(data);
+          }
+        } else if (lastCounter === 0 && counter > 0) {
+          // First load - initialize counter without triggering animation
+          console.log(`Initializing counter for ${serial_number}: ${counter}`);
+          this.state.lastCounters[serial_number] = counter;
+          this.state.save();
         }
       }
       
-      startSimulator() {
-        const intervalMs = (3600 / this.state.config.simulator.cyclesPerHour) * 1000;
-        this.simulatorInterval = setInterval(() => this.runCycle(), intervalMs);
-        this.elements.simStatus.textContent = 'On';
-        this.showToast('Simulator started');
-      }
-      
-      stopSimulator() {
-        if (this.simulatorInterval) {
-          clearInterval(this.simulatorInterval);
-          this.simulatorInterval = null;
-        }
-        this.elements.simStatus.textContent = 'Off';
-        this.showToast('Simulator stopped');
-      }
-      
-      async runCycle() {
-        // Show waveform on product
-        this.showProductWaveform();
-        
-        // Simulate cycle duration
-        const duration = DEVICE.cycleTime + (Math.random() * 4 - 2); // 23-27 seconds
-        
-        await this.sleep(duration * 1000);
-        
+      recordCycle(data) {
         // Calculate savings
         const savings = this.state.calculateSavings();
         
         // Create cycle record
         const cycle = {
           timestamp: Date.now(),
-          duration: duration,
-          waterUsed: DEVICE.waterUsage + (Math.random() * 4 - 2), // 48-52 mL
-          energyUsed: DEVICE.energyUsage + (Math.random() * 0.002 - 0.001), // ~0.008-0.010 kWh
+          duration: DEVICE.cycleTime,
+          waterUsed: DEVICE.waterUsage,  // Always use fixed 50mL
+          energyUsed: DEVICE.energyUsage,
+          deviceSerial: data.serial_number,  // Track which device
           savings: savings,
+          firebaseData: {
+            counter: data.counter,
+            timestamp: data.timestamp
+          }
         };
         
         // Add to state
         this.state.addCycle(cycle);
         
-        // Show checkmark - keep visible for 3 seconds
+        // Show checkmark animation
         this.showProductCheckmark();
         setTimeout(() => {
-          this.hideProductStatus();
+          this.showProductIdle();
         }, 3000);
         
         // Update UI
         this.render();
         this.animateDelta(savings);
+        
+        console.log(`✓ Cycle recorded [${data.serial_number}]:`, cycle);
       }
       
-      showRunningStatus() {
-        const statusContent = document.getElementById('statusContent');
-        statusContent.innerHTML = `
-          <div class="waveform">
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-          </div>
-          <div class="status-text" id="cycleStatusText">Cycle running...</div>
-          <div class="status-subtext" id="cycleSubtext">Cleaning in progress</div>
-        `;
-        this.elements.statusBanner.classList.add('active', 'running');
-        this.elements.statusBanner.classList.remove('success');
-      }
-      
-      updateCycleCountdown(seconds) {
-        const subtextEl = document.getElementById('cycleSubtext');
-        if (subtextEl) {
-          subtextEl.textContent = `${seconds}s remaining`;
-        }
-      }
-      
-      showSuccessStatus(savings) {
-        const statusContent = document.getElementById('statusContent');
-        statusContent.innerHTML = `
-          <div class="success-icon">✓</div>
-          <div class="status-text">Cycle Complete!</div>
-          <div class="status-subtext">
-            Saved ${savings.water.toFixed(2)}L water · 
-            ${savings.energy.toFixed(3)}kWh energy · 
-            ${(savings.time * 60).toFixed(1)} minutes · 
-            £${savings.cost.toFixed(2)}
-          </div>
-        `;
-        this.elements.statusBanner.classList.remove('running');
-        this.elements.statusBanner.classList.add('success');
-      }
-      
-      hideStatus() {
-        this.elements.statusBanner.classList.remove('active', 'success', 'running');
-      }
       
       showProductIdle() {
         const overlay = document.getElementById('productStatusOverlay');
-        if (!overlay.querySelector('.product-waveform')) {
-          overlay.innerHTML = `
-            <div class="product-waveform">
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-              <div class="product-wave-bar idle"></div>
-            </div>
-            <div class="product-status-text">Idle</div>
-          `;
-        } else {
-          const bars = overlay.querySelectorAll('.product-wave-bar');
-          bars.forEach(bar => {
-            bar.classList.remove('active');
-            bar.classList.add('idle');
-          });
-          const text = overlay.querySelector('.product-status-text');
-          if (text) text.textContent = 'Idle';
-        }
-      }
-      
-      showProductWaveform() {
-        const overlay = document.getElementById('productStatusOverlay');
-        if (!overlay.querySelector('.product-waveform')) {
-          overlay.innerHTML = `
-            <div class="product-waveform">
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-              <div class="product-wave-bar active"></div>
-            </div>
-            <div class="product-status-text">Rinsing</div>
-          `;
-        } else {
-          const bars = overlay.querySelectorAll('.product-wave-bar');
-          bars.forEach(bar => {
-            bar.classList.remove('idle');
-            bar.classList.add('active');
-          });
-          const text = overlay.querySelector('.product-status-text');
-          if (text) text.textContent = 'Rinsing';
-        }
+        overlay.innerHTML = `
+          <div class="product-status-text" style="font-size: 16px; font-weight: 600; color: #6e6e73;">Ready</div>
+        `;
       }
       
       showProductCheckmark() {
@@ -2043,7 +2004,7 @@
       }
       
       hideProductStatus() {
-        // Return to idle state instead of hiding
+        // Return to idle/ready state
         this.showProductIdle();
       }
       
@@ -2164,9 +2125,10 @@
           return;
         }
         
-        const headers = ['Timestamp', 'Duration (s)', 'Water Used (mL)', 'Energy Used (kWh)', 'Water Saved (L)', 'Energy Saved (kWh)', 'Time Saved (hrs)', 'Cost Saved (£)'];
+        const headers = ['Timestamp', 'Device Serial', 'Duration (s)', 'Water Used (mL)', 'Energy Used (kWh)', 'Water Saved (L)', 'Energy Saved (kWh)', 'Time Saved (hrs)', 'Cost Saved (£)'];
         const rows = this.state.cycles.map(c => [
           new Date(c.timestamp).toISOString(),
+          c.deviceSerial || 'Unknown',
           c.duration.toFixed(1),
           c.waterUsed.toFixed(1),
           c.energyUsed.toFixed(4),
@@ -2190,7 +2152,6 @@
       
       resetDay() {
         if (confirm('Reset all data for today? This cannot be undone.')) {
-          this.stopSimulator();
           this.state.reset();
           this.render();
           this.showToast('Day reset');
@@ -2250,10 +2211,6 @@
       checkFilters() {
         this.showToast('Filter maintenance tracker coming soon');
         // Future: Show filter condition, service history
-      }
-      
-      sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
       }
     }
     
