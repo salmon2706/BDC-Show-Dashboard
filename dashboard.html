@@ -1449,7 +1449,7 @@
             <button class="btn btn-secondary" id="btnReset">Reset Today</button>
           </div>
           <div id="connectionStatus" style="margin-top: 16px; padding: 12px; background: rgba(0, 122, 255, 0.1); border-radius: 12px; font-size: 14px; color: #007aff;">
-            <strong>🔄 Connecting...</strong> Device KIR-5575
+            <strong>🔄 Connecting...</strong> 5 devices
           </div>
         </div>
       </div>
@@ -1567,7 +1567,7 @@
     // Device Configuration
     // ============================================
     const DEVICE = {
-      serialNumbers: ['KIR-5575', 'No QR'],  // Device serials to track
+      serialNumbers: ['VLK-5222', 'LIO-5365', 'VIM-5404', 'SEF-5531', 'KIR-5575'],  // Device serials to track
       cycleTime: 25,                         // 25 seconds per cycle
       waterUsage: 50,                        // 50 mL per cycle
       energyUsage: 0.009,                    // 0.009 kWh per cycle
@@ -1606,6 +1606,7 @@
         this.sessionDate = new Date().toDateString();
         this.unlocked = false;
         this.lastCounters = {};  // Track last known counter per device
+        this.devicesOnline = new Set();  // Track which devices have sent data
         // Initialize counters for each device
         DEVICE.serialNumbers.forEach(serial => {
           this.lastCounters[serial] = 0;
@@ -1710,6 +1711,8 @@
           if (overlay) {
             this.showProductIdle();
           }
+          // Initialize device status display
+          this.updateDeviceStatus();
         }, 100);
       }
       
@@ -1899,7 +1902,8 @@
           if (snap.val() === true) {
             console.log('✓ Connected to Firebase');
             if (statusEl) {
-              statusEl.innerHTML = `<strong>✓ Live:</strong> Tracking ${DEVICE.serialNumbers.length} devices`;
+              const deviceList = DEVICE.serialNumbers.join(', ');
+              statusEl.innerHTML = `<strong>✓ Live:</strong> Monitoring ${DEVICE.serialNumbers.length} devices<br><small style="font-size: 11px; opacity: 0.7;">${deviceList}</small>`;
               statusEl.style.background = 'rgba(52, 199, 89, 0.1)';
               statusEl.style.color = '#34c759';
             }
@@ -1917,6 +1921,12 @@
       handleFirebaseData(data) {
         const { counter, timestamp, serial_number } = data;
         const lastCounter = this.state.lastCounters[serial_number] || 0;
+        
+        // Mark device as online
+        if (!this.state.devicesOnline.has(serial_number)) {
+          this.state.devicesOnline.add(serial_number);
+          this.updateDeviceStatus();
+        }
         
         console.log('Firebase data received:', { 
           serial: serial_number, 
@@ -2211,6 +2221,27 @@
       checkFilters() {
         this.showToast('Filter maintenance tracker coming soon');
         // Future: Show filter condition, service history
+      }
+      
+      updateDeviceStatus() {
+        const badge = document.querySelector('.product-badge');
+        const onlineCount = this.state.devicesOnline.size;
+        const totalCount = DEVICE.serialNumbers.length;
+        
+        if (badge) {
+          if (onlineCount === 0) {
+            badge.innerHTML = `${totalCount} devices · Waiting for connection...`;
+            badge.style.color = 'var(--text-tertiary)';
+          } else if (onlineCount === totalCount) {
+            badge.innerHTML = `✓ All ${totalCount} devices online · 25s cycle · 50mL · 0.009kWh`;
+            badge.style.color = 'var(--success)';
+          } else {
+            badge.innerHTML = `${onlineCount}/${totalCount} devices online · 25s cycle · 50mL · 0.009kWh`;
+            badge.style.color = 'var(--accent)';
+          }
+        }
+        
+        console.log(`Device status updated: ${onlineCount}/${totalCount} online`);
       }
     }
     
