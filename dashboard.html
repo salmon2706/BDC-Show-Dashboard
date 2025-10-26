@@ -932,7 +932,7 @@
       padding: 4px;
       font-size: 11px;
       font-weight: 500;
-      color: var(--text-secondary);
+      color: var(--accent);
       width: 100%;
       max-width: 280px;
       margin-bottom: 16px;
@@ -2143,6 +2143,7 @@
         }).join('');
         
         overlay.innerHTML = `
+          <div style="font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; text-align: center; opacity: 0.6;">Live Status</div>
           <div class="device-status-list">
             ${deviceItems}
           </div>
