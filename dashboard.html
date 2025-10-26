@@ -1725,11 +1725,13 @@
         this.unlocked = false;
         this.lastCounters = {};  // Track last known counter per device
         this.devicesOnline = new Set();  // Track which devices have sent data
-        this.deviceActivity = {};  // Track last activity timestamp per device
+        this.deviceActivity = {};  // Track last activity timestamp per device (for checkmark animation)
+        this.lastHeartbeat = {};  // Track last data received timestamp (for online/offline status)
         // Initialize counters for each device
         DEVICE.serialNumbers.forEach(serial => {
           this.lastCounters[serial] = 0;
           this.deviceActivity[serial] = null;
+          this.lastHeartbeat[serial] = null;
         });
         this.load();
       }
@@ -2034,11 +2036,48 @@
             }
           }
         });
+        
+        // Start timeout checker (every 30 seconds, check for stale devices)
+        this.startTimeoutChecker();
+      }
+      
+      startTimeoutChecker() {
+        const TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+        const CHECK_INTERVAL_MS = 30 * 1000; // Check every 30 seconds
+        
+        setInterval(() => {
+          const now = Date.now();
+          let anyChanges = false;
+          
+          DEVICE.serialNumbers.forEach(serial => {
+            const lastSeen = this.state.lastHeartbeat[serial];
+            const isOnline = this.state.devicesOnline.has(serial);
+            
+            if (lastSeen && isOnline) {
+              const timeSinceLastSeen = now - lastSeen;
+              
+              // If device hasn't sent data in 10 minutes, mark as offline
+              if (timeSinceLastSeen > TIMEOUT_MS) {
+                this.state.devicesOnline.delete(serial);
+                anyChanges = true;
+                console.log(`⚠ Device offline (timeout): ${serial} - ${DEVICE.deviceNames[serial]} (last seen ${Math.floor(timeSinceLastSeen / 60000)} min ago)`);
+              }
+            }
+          });
+          
+          // Re-render device list if any device status changed
+          if (anyChanges) {
+            this.renderDeviceList();
+          }
+        }, CHECK_INTERVAL_MS);
       }
       
       handleFirebaseData(data) {
         const { counter, timestamp, serial_number } = data;
         const lastCounter = this.state.lastCounters[serial_number] || 0;
+        
+        // Update last heartbeat timestamp
+        this.state.lastHeartbeat[serial_number] = Date.now();
         
         // Mark device as online
         const wasOffline = !this.state.devicesOnline.has(serial_number);
