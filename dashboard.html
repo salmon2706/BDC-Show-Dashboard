@@ -1470,6 +1470,7 @@
               <span class="cycle-badge" id="energyUsageBadge">+0.009kWh</span>
             </div>
             <div class="metric-value" id="metricEnergyUsage">0.000<small style="font-size: 26px; font-weight: 600; margin-left: 4px;">kWh</small></div>
+            <div style="font-size: 16px; font-weight: 600; margin-top: 8px; color: var(--text-secondary);" id="energyCost">Estimated cost: £0.00</div>
           </div>
           
           <!-- Energy Savings (alternating) -->
@@ -1483,14 +1484,14 @@
           <div class="metric-card" data-metric="cups">
             <div class="metric-label">Paper Cups Saved</div>
             <div class="metric-value" id="metricCups">0</div>
-            <div style="font-size: 16px; font-weight: 600; margin-top: 8px; color: var(--text-secondary); opacity: 0;">.</div>
+            <div style="font-size: 16px; font-weight: 600; margin-top: 8px; color: var(--text-secondary);">Today at event</div>
           </div>
           
           <!-- Cup Cost Saved -->
           <div class="metric-card" data-metric="cup-cost">
             <div class="metric-label">Cup Cost Saved</div>
             <div class="metric-value" id="metricCupCost">£0.00</div>
-            <div style="font-size: 16px; font-weight: 600; margin-top: 8px; color: var(--text-secondary); opacity: 0;">.</div>
+            <div style="font-size: 16px; font-weight: 600; margin-top: 8px; color: var(--text-secondary);" id="cupCostAssumption">Based on £0.20/cup</div>
           </div>
         </div>
         
@@ -2175,7 +2176,7 @@
               <div class="device-name">${name}</div>
               <div class="device-status-indicator">
                 <div class="device-dot ${isOnline ? 'online' : ''}"></div>
-                <div class="device-checkmark ${recentActivity ? 'show' : ''}">✓</div>
+                <div class="device-checkmark ${recentActivity ? 'show' : ''}">+1</div>
               </div>
             </div>
           `;
@@ -2225,10 +2226,17 @@
         // Calculate totals
         const totalWaterUsed = (numCycles * DEVICE.waterUsage) / 1000; // Convert to litres
         const totalEnergyUsed = numCycles * DEVICE.energyUsage;
+        const energyCost = totalEnergyUsed * 0.28; // 28p per kWh
         
         // Update usage metrics
         this.elements.metricWaterUsage.innerHTML = `${totalWaterUsed.toFixed(2)}<small style="font-size: 24px; font-weight: 600; margin-left: 4px;">L</small>`;
         this.elements.metricEnergyUsage.innerHTML = `${totalEnergyUsed.toFixed(3)}<small style="font-size: 24px; font-weight: 600; margin-left: 4px;">kWh</small>`;
+        
+        // Update energy cost
+        const energyCostEl = document.getElementById('energyCost');
+        if (energyCostEl) {
+          energyCostEl.textContent = `Estimated cost: £${energyCost.toFixed(2)}`;
+        }
         
         // Update cup metrics
         this.elements.metricCups.textContent = numCycles.toString();
@@ -2244,8 +2252,8 @@
       updateSavingsDisplay() {
         const numCycles = this.state.cycles.length;
         const baseline = BASELINES[this.comparisonMode];
-        const label = this.comparisonMode === 'handwash' ? 'Water Saved vs Handwash' : 'Water Saved vs Dishwasher';
-        const energyLabel = this.comparisonMode === 'handwash' ? 'Energy Saved vs Handwash' : 'Energy Saved vs Dishwasher';
+        const label = this.comparisonMode === 'handwash' ? 'Water Saved vs <span style="color: #ff9f0a;">Handwash</span>' : 'Water Saved vs <span style="color: #ff9f0a;">Dishwasher</span>';
+        const energyLabel = this.comparisonMode === 'handwash' ? 'Energy Saved vs <span style="color: #ff9f0a;">Handwash</span>' : 'Energy Saved vs <span style="color: #ff9f0a;">Dishwasher</span>';
         
         // Water savings
         const baselineWaterTotal = (numCycles * baseline.water) / 1000; // L
@@ -2253,7 +2261,7 @@
         const waterSaved = baselineWaterTotal - actualWaterUsed;
         const waterPercent = baselineWaterTotal > 0 ? ((waterSaved / baselineWaterTotal) * 100) : 0;
         
-        this.elements.waterSavingsLabel.textContent = label;
+        this.elements.waterSavingsLabel.innerHTML = label;
         this.elements.metricWaterSavings.innerHTML = `${waterSaved.toFixed(2)}<small style="font-size: 24px; font-weight: 600; margin-left: 4px;">L</small>`;
         this.elements.waterSavingsPercent.textContent = `${Math.round(waterPercent)}% less water`;
         
@@ -2263,7 +2271,7 @@
         const energySaved = baselineEnergyTotal - actualEnergyUsed;
         const energyPercent = baselineEnergyTotal > 0 ? ((energySaved / baselineEnergyTotal) * 100) : 0;
         
-        this.elements.energySavingsLabel.textContent = energyLabel;
+        this.elements.energySavingsLabel.innerHTML = energyLabel;
         this.elements.metricEnergySavings.innerHTML = `${energySaved.toFixed(3)}<small style="font-size: 20px; font-weight: 600; margin-left: 4px;">kWh</small>`;
         this.elements.energySavingsPercent.textContent = `${Math.round(energyPercent)}% less energy`;
       }
