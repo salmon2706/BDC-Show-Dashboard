@@ -728,7 +728,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 20px 32px 32px 32px;
+      padding: 0px 32px 32px 32px;
       z-index: 50;
       opacity: 0;
       visibility: hidden;
@@ -746,10 +746,11 @@
     
     .product-image-container {
       width: 100%;
-      max-width: 260px;
+      max-width: 240px;
       position: relative;
       flex-shrink: 0;
-      margin-bottom: 8px;
+      margin-bottom: 16px;
+      margin-top: -20px;
     }
     
     .product-status-overlay {
@@ -761,6 +762,7 @@
       opacity: 1;
       transition: opacity 0.4s ease;
       flex-shrink: 0;
+      margin-top: 8px;
     }
     
     .product-waveform {
@@ -2122,8 +2124,6 @@
       
       renderDeviceList() {
         const overlay = document.getElementById('productStatusOverlay');
-        const onlineCount = this.state.devicesOnline.size;
-        const totalCount = DEVICE.serialNumbers.length;
         
         const deviceItems = DEVICE.serialNumbers.map(serial => {
           const name = DEVICE.deviceNames[serial];
@@ -2143,10 +2143,6 @@
         }).join('');
         
         overlay.innerHTML = `
-          <div style="text-align: center; margin-bottom: 12px;">
-            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Device Status</div>
-            <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em;">${onlineCount}/${totalCount} Online</div>
-          </div>
           <div class="device-status-list">
             ${deviceItems}
           </div>
