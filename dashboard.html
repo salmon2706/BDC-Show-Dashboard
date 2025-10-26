@@ -2017,7 +2017,7 @@
           }
         });
         
-        // Handle connection status
+        // Handle connection status with reconnection logic
         const connectedRef = database.ref('.info/connected');
         connectedRef.on('value', (snap) => {
           const statusEl = document.getElementById('connectionStatus');
@@ -2029,6 +2029,11 @@
               statusEl.style.background = 'rgba(52, 199, 89, 0.1)';
               statusEl.style.color = '#34c759';
             }
+            // Clear any pending reconnection attempts
+            if (this.reconnectTimeout) {
+              clearTimeout(this.reconnectTimeout);
+              this.reconnectTimeout = null;
+            }
           } else {
             console.log('✗ Disconnected from Firebase');
             if (statusEl) {
@@ -2036,11 +2041,74 @@
               statusEl.style.background = 'rgba(255, 149, 0, 0.1)';
               statusEl.style.color = '#ff9500';
             }
+            // Attempt to force reconnection after 3 seconds
+            this.scheduleReconnect();
           }
         });
         
         // Start timeout checker (every 30 seconds, check for stale devices)
         this.startTimeoutChecker();
+        
+        // Start page visibility monitor for Android WebView issues
+        this.startVisibilityMonitor();
+        
+        // Periodic connection health check
+        this.startConnectionHealthCheck();
+      }
+      
+      scheduleReconnect() {
+        // Avoid multiple reconnection attempts
+        if (this.reconnectTimeout) return;
+        
+        console.log('⏱ Scheduling Firebase reconnection attempt...');
+        this.reconnectTimeout = setTimeout(() => {
+          console.log('🔄 Attempting to reconnect to Firebase...');
+          // Force Firebase to attempt reconnection
+          database.goOnline();
+          this.reconnectTimeout = null;
+        }, 3000);
+      }
+      
+      startVisibilityMonitor() {
+        // Detect when page becomes visible again (Android WebView often suspends when hidden)
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) {
+            console.log('👁 Page visible - checking Firebase connection...');
+            // Force online when page becomes visible
+            database.goOnline();
+            
+            // Check if we're actually connected
+            database.ref('.info/connected').once('value').then((snap) => {
+              if (!snap.val()) {
+                console.log('🔌 Not connected - forcing reconnection...');
+                database.goOffline();
+                setTimeout(() => database.goOnline(), 100);
+              }
+            });
+          }
+        });
+        
+        console.log('✓ Page visibility monitor started');
+      }
+      
+      startConnectionHealthCheck() {
+        // Periodic check to ensure connection is healthy (every 60 seconds)
+        setInterval(() => {
+          database.ref('.info/connected').once('value').then((snap) => {
+            const isConnected = snap.val();
+            if (!isConnected) {
+              console.log('⚠ Health check failed - reconnecting...');
+              database.goOffline();
+              setTimeout(() => database.goOnline(), 100);
+            } else {
+              console.log('✓ Health check passed - Firebase connected');
+            }
+          }).catch((err) => {
+            console.error('❌ Health check error:', err);
+          });
+        }, 60000); // Every 60 seconds
+        
+        console.log('✓ Connection health check started (60s interval)');
       }
       
       startTimeoutChecker() {
