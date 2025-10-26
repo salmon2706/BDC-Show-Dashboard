@@ -935,6 +935,74 @@
       margin-bottom: 16px;
     }
     
+    .device-status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 280px;
+    }
+    
+    .device-status-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 2px 8px rgba(31, 38, 135, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .device-status-item.active {
+      background: rgba(52, 199, 89, 0.15);
+      border-color: rgba(52, 199, 89, 0.4);
+      transform: scale(1.02);
+      box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+    }
+    
+    .device-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    
+    .device-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .device-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      transition: all 0.3s ease;
+    }
+    
+    .device-dot.online {
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(0, 122, 255, 0.4);
+    }
+    
+    .device-checkmark {
+      font-size: 16px;
+      color: var(--success);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    .device-checkmark.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
     
     /* ============================================
        Settings Panel
@@ -1568,6 +1636,13 @@
     // ============================================
     const DEVICE = {
       serialNumbers: ['VLK-5222', 'LIO-5365', 'VIM-5404', 'SEF-5531', 'KIR-5575'],  // Device serials to track
+      deviceNames: {
+        'VLK-5222': 'SmallSand',
+        'LIO-5365': 'LightFruit',
+        'VIM-5404': 'BigEarth',
+        'SEF-5531': 'CalmJelly',
+        'KIR-5575': 'KindTiger'
+      },
       cycleTime: 25,                         // 25 seconds per cycle
       waterUsage: 50,                        // 50 mL per cycle
       energyUsage: 0.009,                    // 0.009 kWh per cycle
@@ -1607,9 +1682,11 @@
         this.unlocked = false;
         this.lastCounters = {};  // Track last known counter per device
         this.devicesOnline = new Set();  // Track which devices have sent data
+        this.deviceActivity = {};  // Track last activity timestamp per device
         // Initialize counters for each device
         DEVICE.serialNumbers.forEach(serial => {
           this.lastCounters[serial] = 0;
+          this.deviceActivity[serial] = null;
         });
         this.load();
       }
@@ -1705,14 +1782,12 @@
         document.getElementById('productShowcase').classList.add('show');
         document.getElementById('app').classList.add('with-product-view');
         
-        // Show idle state on product
+        // Show device list on product
         setTimeout(() => {
           const overlay = document.getElementById('productStatusOverlay');
           if (overlay) {
-            this.showProductIdle();
+            this.renderDeviceList();
           }
-          // Initialize device status display
-          this.updateDeviceStatus();
         }, 100);
       }
       
@@ -1923,9 +1998,11 @@
         const lastCounter = this.state.lastCounters[serial_number] || 0;
         
         // Mark device as online
-        if (!this.state.devicesOnline.has(serial_number)) {
+        const wasOffline = !this.state.devicesOnline.has(serial_number);
+        if (wasOffline) {
           this.state.devicesOnline.add(serial_number);
-          this.updateDeviceStatus();
+          this.renderDeviceList();
+          console.log(`✓ Device online: ${serial_number} - ${DEVICE.deviceNames[serial_number]}`);
         }
         
         console.log('Firebase data received:', { 
@@ -1967,6 +2044,7 @@
           waterUsed: DEVICE.waterUsage,  // Always use fixed 50mL
           energyUsed: DEVICE.energyUsage,
           deviceSerial: data.serial_number,  // Track which device
+          deviceName: DEVICE.deviceNames[data.serial_number],
           savings: savings,
           firebaseData: {
             counter: data.counter,
@@ -1977,45 +2055,59 @@
         // Add to state
         this.state.addCycle(cycle);
         
-        // Show checkmark animation
-        this.showProductCheckmark();
+        // Mark device activity
+        this.state.deviceActivity[data.serial_number] = Date.now();
+        
+        // Update device list to show checkmark on active device
+        this.renderDeviceList();
+        
+        // Clear the checkmark after 5 seconds
         setTimeout(() => {
-          this.showProductIdle();
-        }, 3000);
+          this.state.deviceActivity[data.serial_number] = null;
+          this.renderDeviceList();
+        }, 5000);
         
         // Update UI
         this.render();
         this.animateDelta(savings);
         
-        console.log(`✓ Cycle recorded [${data.serial_number}]:`, cycle);
+        console.log(`✓ Cycle recorded [${data.serial_number} - ${DEVICE.deviceNames[data.serial_number]}]:`, cycle);
       }
       
       
       showProductIdle() {
-        const overlay = document.getElementById('productStatusOverlay');
-        overlay.innerHTML = `
-          <div class="product-status-text" style="font-size: 16px; font-weight: 600; color: #6e6e73;">Ready</div>
-        `;
+        this.renderDeviceList();
       }
       
-      showProductCheckmark() {
+      renderDeviceList() {
         const overlay = document.getElementById('productStatusOverlay');
-        overlay.innerHTML = `
-          <div class="product-checkmark">
-            <div class="check-circle"></div>
-            <div class="check-path">
-              <svg viewBox="0 0 24 24">
-                <path d="M6 12l4 4 8-8"/>
-              </svg>
+        const deviceItems = DEVICE.serialNumbers.map(serial => {
+          const name = DEVICE.deviceNames[serial];
+          const isOnline = this.state.devicesOnline.has(serial);
+          const lastActivity = this.state.deviceActivity[serial];
+          const recentActivity = lastActivity && (Date.now() - lastActivity < 5000); // Within 5 seconds
+          
+          return `
+            <div class="device-status-item ${recentActivity ? 'active' : ''}" data-serial="${serial}">
+              <div class="device-name">${name}</div>
+              <div class="device-status-indicator">
+                <div class="device-dot ${isOnline ? 'online' : ''}"></div>
+                <div class="device-checkmark ${recentActivity ? 'show' : ''}">✓</div>
+              </div>
             </div>
+          `;
+        }).join('');
+        
+        overlay.innerHTML = `
+          <div class="device-status-list">
+            ${deviceItems}
           </div>
-          <div class="product-status-text">Complete</div>
         `;
       }
       
       hideProductStatus() {
-        // Return to idle/ready state
-        this.showProductIdle();
+        // Return to device list view
+        this.renderDeviceList();
       }
       
       animateDelta(savings) {
@@ -2135,10 +2227,11 @@
           return;
         }
         
-        const headers = ['Timestamp', 'Device Serial', 'Duration (s)', 'Water Used (mL)', 'Energy Used (kWh)', 'Water Saved (L)', 'Energy Saved (kWh)', 'Time Saved (hrs)', 'Cost Saved (£)'];
+        const headers = ['Timestamp', 'Device Serial', 'Device Name', 'Duration (s)', 'Water Used (mL)', 'Energy Used (kWh)', 'Water Saved (L)', 'Energy Saved (kWh)', 'Time Saved (hrs)', 'Cost Saved (£)'];
         const rows = this.state.cycles.map(c => [
           new Date(c.timestamp).toISOString(),
           c.deviceSerial || 'Unknown',
+          c.deviceName || 'Unknown',
           c.duration.toFixed(1),
           c.waterUsed.toFixed(1),
           c.energyUsed.toFixed(4),
@@ -2221,27 +2314,6 @@
       checkFilters() {
         this.showToast('Filter maintenance tracker coming soon');
         // Future: Show filter condition, service history
-      }
-      
-      updateDeviceStatus() {
-        const badge = document.querySelector('.product-badge');
-        const onlineCount = this.state.devicesOnline.size;
-        const totalCount = DEVICE.serialNumbers.length;
-        
-        if (badge) {
-          if (onlineCount === 0) {
-            badge.innerHTML = `${totalCount} devices · Waiting for connection...`;
-            badge.style.color = 'var(--text-tertiary)';
-          } else if (onlineCount === totalCount) {
-            badge.innerHTML = `✓ All ${totalCount} devices online · 25s cycle · 50mL · 0.009kWh`;
-            badge.style.color = 'var(--success)';
-          } else {
-            badge.innerHTML = `${onlineCount}/${totalCount} devices online · 25s cycle · 50mL · 0.009kWh`;
-            badge.style.color = 'var(--accent)';
-          }
-        }
-        
-        console.log(`Device status updated: ${onlineCount}/${totalCount} online`);
       }
     }
     
