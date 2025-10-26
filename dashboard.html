@@ -2004,16 +2004,21 @@
       startFirebaseListener() {
         console.log(`Starting Firebase listener for devices: ${DEVICE.serialNumbers.join(', ')}`);
         
-        // Listen to ALL counter_values and filter by serial number
+        // Listen ONLY to NEW data (after connection) - not historical data
+        // This prevents loading thousands of old records on page load
         const counterRef = database.ref('counter_values');
+        const now = Date.now();
         
-        counterRef.on('child_added', (snapshot) => {
+        // Use orderByChild + startAt to only get new data from this moment forward
+        counterRef.orderByChild('timestamp').startAt(now).on('child_added', (snapshot) => {
           const data = snapshot.val();
           // Only process if it's one of our tracked devices
           if (data && DEVICE.serialNumbers.includes(data.serial_number)) {
             this.handleFirebaseData(data);
           }
         });
+        
+        console.log(`📡 Listening for NEW data only (timestamp >= ${now})`);
         
         // Handle connection status
         const connectedRef = database.ref('.info/connected');
