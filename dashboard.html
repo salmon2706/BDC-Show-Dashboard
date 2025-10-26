@@ -2074,16 +2074,24 @@
         document.addEventListener('visibilitychange', () => {
           if (!document.hidden) {
             console.log('👁 Page visible - checking Firebase connection...');
-            // Force online when page becomes visible
-            database.goOnline();
+            
+            // Gentle reconnection check with timeout protection
+            const checkTimeout = setTimeout(() => {
+              console.log('⏱ Connection check timeout - skipping');
+            }, 5000);
             
             // Check if we're actually connected
             database.ref('.info/connected').once('value').then((snap) => {
+              clearTimeout(checkTimeout);
               if (!snap.val()) {
-                console.log('🔌 Not connected - forcing reconnection...');
-                database.goOffline();
-                setTimeout(() => database.goOnline(), 100);
+                console.log('🔌 Not connected - will reconnect naturally via Firebase');
+                // Let Firebase handle reconnection naturally, don't force it
+              } else {
+                console.log('✓ Already connected');
               }
+            }).catch((err) => {
+              clearTimeout(checkTimeout);
+              console.error('❌ Connection check error:', err);
             });
           }
         });
@@ -2092,23 +2100,24 @@
       }
       
       startConnectionHealthCheck() {
-        // Periodic check to ensure connection is healthy (every 60 seconds)
+        // Periodic check to ensure connection is healthy (every 5 minutes - gentle on WebView)
         setInterval(() => {
+          // Only check if page is visible to avoid WebView issues
+          if (document.hidden) return;
+          
           database.ref('.info/connected').once('value').then((snap) => {
             const isConnected = snap.val();
             if (!isConnected) {
-              console.log('⚠ Health check failed - reconnecting...');
-              database.goOffline();
-              setTimeout(() => database.goOnline(), 100);
+              console.log('⚠ Health check failed - will reconnect on next visibility');
             } else {
               console.log('✓ Health check passed - Firebase connected');
             }
           }).catch((err) => {
             console.error('❌ Health check error:', err);
           });
-        }, 60000); // Every 60 seconds
+        }, 300000); // Every 5 minutes (much less aggressive)
         
-        console.log('✓ Connection health check started (60s interval)');
+        console.log('✓ Connection health check started (5min interval)');
       }
       
       startTimeoutChecker() {
