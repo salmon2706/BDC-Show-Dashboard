@@ -727,13 +727,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 32px 24px 32px;
+      justify-content: flex-start;
+      padding: 20px 32px 32px 32px;
       z-index: 50;
       opacity: 0;
       visibility: hidden;
       transition: opacity 1.4s ease-in-out 1.4s, 
                   visibility 0s linear 1.4s;
+      gap: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     
     .product-showcase.show {
@@ -743,23 +746,21 @@
     
     .product-image-container {
       width: 100%;
-      max-width: 300px;
+      max-width: 260px;
       position: relative;
-      margin-top: -30px;
+      flex-shrink: 0;
+      margin-bottom: 8px;
     }
     
     .product-status-overlay {
-      position: absolute;
-      bottom: -15px;
-      left: 50%;
-      transform: translateX(-50%);
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 0;
       opacity: 1;
       transition: opacity 0.4s ease;
-      z-index: 100;
+      flex-shrink: 0;
     }
     
     .product-waveform {
@@ -938,30 +939,57 @@
     .device-status-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 2px;
       width: 100%;
-      max-width: 280px;
+      max-width: 300px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border-radius: 18px;
+      border: 1.5px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 
+        0 8px 24px rgba(31, 38, 135, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
     }
     
     .device-status-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.25);
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: 0 2px 8px rgba(31, 38, 135, 0.1);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid transparent;
+    }
+    
+    .device-status-item:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    
+    .device-status-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(48, 209, 88, 0.15));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      border-radius: 12px;
     }
     
     .device-status-item.active {
-      background: rgba(52, 199, 89, 0.15);
-      border-color: rgba(52, 199, 89, 0.4);
+      background: rgba(255, 255, 255, 0.5);
+      border-color: rgba(52, 199, 89, 0.3);
       transform: scale(1.02);
-      box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+      box-shadow: 0 4px 12px rgba(52, 199, 89, 0.25);
+    }
+    
+    .device-status-item.active::before {
+      opacity: 1;
     }
     
     .device-name {
@@ -969,38 +997,51 @@
       font-weight: 600;
       color: var(--text-primary);
       letter-spacing: -0.01em;
+      position: relative;
+      z-index: 1;
     }
     
     .device-status-indicator {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
     }
     
     .device-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--text-tertiary);
+      background: rgba(142, 142, 147, 0.4);
       transition: all 0.3s ease;
+      flex-shrink: 0;
     }
     
     .device-dot.online {
       background: var(--accent);
-      box-shadow: 0 0 8px rgba(0, 122, 255, 0.4);
+      box-shadow: 0 0 8px rgba(0, 122, 255, 0.6);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
     
     .device-checkmark {
       font-size: 16px;
       color: var(--success);
       opacity: 0;
-      transform: scale(0.5);
-      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform: scale(0.3) rotate(-15deg);
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      font-weight: 700;
+      flex-shrink: 0;
     }
     
     .device-checkmark.show {
       opacity: 1;
-      transform: scale(1);
+      transform: scale(1) rotate(0deg);
     }
     
     
@@ -2081,6 +2122,9 @@
       
       renderDeviceList() {
         const overlay = document.getElementById('productStatusOverlay');
+        const onlineCount = this.state.devicesOnline.size;
+        const totalCount = DEVICE.serialNumbers.length;
+        
         const deviceItems = DEVICE.serialNumbers.map(serial => {
           const name = DEVICE.deviceNames[serial];
           const isOnline = this.state.devicesOnline.has(serial);
@@ -2099,6 +2143,10 @@
         }).join('');
         
         overlay.innerHTML = `
+          <div style="text-align: center; margin-bottom: 12px;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Device Status</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em;">${onlineCount}/${totalCount} Online</div>
+          </div>
           <div class="device-status-list">
             ${deviceItems}
           </div>
